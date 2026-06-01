@@ -1,0 +1,13 @@
+
+- `GET /history`: Obtiene historial de cálculos
+- `DELETE /history/:id`: Elimina un cálculo del historial
+
+### Frontend
+Acceder a `http://localhost:3000` para:
+- Interfaz con campos numéricos (A y B)
+- Botones de operación: + - × ÷ 
+- Visualización de resultados
+- Panel de historial con últimos 10 cálculos
+
+## Tests
+Ejecutar pruebas con:
