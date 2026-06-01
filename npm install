@@ -1,0 +1,5 @@
+
+## Uso
+### Backend (API Endpoints)
+- `POST /calculate`: Realiza operaciones matemáticas
+Ejemplo:

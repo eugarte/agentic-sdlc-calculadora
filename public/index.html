@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .calculator {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .inputs input {
+            width: 100px;
+            padding: 8px;
+            font-size: 16px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .result {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .history {
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .history-item button {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="inputs">
+            <input type="number" id="inputA" placeholder="Number A">
+            <input type="number" id="inputB" placeholder="Number B">
+        </div>
+        <div class="buttons">
+            <button onclick="calculate('sum')">+</button>
+            <button onclick="calculate('subtract')">−</button>
+            <button onclick="calculate('multiply')">×</button>
+            <button onclick="calculate('divide')">÷</button>
+        </div>
+        <div class="result" id="result">0</div>
+    </div>
+
+    <div class="history">
+        <h3>History</h3>
+        <div id="history-list"></div>
+    </div>
+
+    <script>
+        async function calculate(operation) {
+            const a = document.getElementById('inputA').value;
+            const b = document.getElementById('inputB').value;
+
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ operation, a, b })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('result').textContent = data.result;
+                loadHistory();
+            } else {
+                alert('Error in calculation');
+            }
+        }
+
+        async function loadHistory() {
+            const response = await fetch('/history');
+            const history = await response.json();
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+
+            history.slice(0, 10).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <span>${item.a} ${getOperationSymbol(item.operation)} ${item.b} = ${item.result}</span>
+                    <button onclick="deleteHistoryItem(${item.id})">×</button>
+                `;
+                historyList.appendChild(div);
+            });
+        }
+
+        async function deleteHistoryItem(id) {
+            await fetch(`/history/${id}`, { method: 'DELETE' });
+            loadHistory();
+        }
+
+        function getOperationSymbol(operation) {
+            switch(operation) {
+                case 'sum': return '+';
+                case 'subtract': return '−';
+                case 'multiply': return '×';
+                case 'divide': return '÷';
+                default: return '';
+            }
+        }
+
+        // Load initial history
+        loadHistory();
+    </script>
+</body>
+</html>
